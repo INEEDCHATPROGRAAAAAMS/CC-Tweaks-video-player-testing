@@ -4,7 +4,7 @@ local dfpwm = require "cc.audio.dfpwm"
 
 local speaker = peripheral.find "speaker"
 local file
-local path = "https://github.com/INEEDCHATPROGRAAAAAMS/CC-Tweaks-video-player-testing/raw/refs/heads/main/IronSuit.32v"
+local path = ...
 if path:match "^https?://" then
     file = assert(http.get(path, nil, true))
 else
