@@ -1,0 +1,60 @@
+-- Computer B: Receives and analyzes step timings
+local modemSide = "back" -- adjust as needed
+rednet.open(modemSide)
+
+local protocol = "sortStep"
+local lastTime = nil
+local frameTimes = {}
+
+print("Listening for sort steps...")
+
+while true do
+    local senderID, msg, prot = rednet.receive(protocol)
+
+    local now = os.epoch("utc")
+    if msg.type == "start" then
+        print("Sorting started.")
+        lastTime = now
+    elseif msg.type == "step" then
+        if lastTime then
+            local delta = now - lastTime
+            table.insert(frameTimes, delta)
+            lastTime = now
+            print(("Step at index %d | Δt: %dms"):format(msg.data.index or -1, delta))
+        end
+    elseif msg.type == "done" then
+        print("Sorting complete.")
+        break
+    end
+end
+
+-- Analysis
+local function average(t)
+    local sum = 0
+    for _, v in ipairs(t) do sum = sum + v end
+    return sum / #t
+end
+
+local function percentile(t, p)
+    table.sort(t)
+    local idx = math.ceil(#t * p)
+    return t[idx] or t[#t]
+end
+
+local avg = average(frameTimes)
+local min = math.huge
+local max = -math.huge
+
+for _, v in ipairs(frameTimes) do
+    if v < min then min = v end
+    if v > max then max = v end
+end
+
+local low1 = percentile(frameTimes, 0.99) -- worst 1% frame
+
+print(("\n--- Sorting Step Time Stats ---"))
+print(("Total steps: %d"):format(#frameTimes))
+print(("Min step time: %d ms"):format(min))
+print(("Max step time: %d ms"):format(max))
+print(("Average step time: %.2f ms"):format(avg))
+print(("1%% low step time: %d ms"):format(low1))
