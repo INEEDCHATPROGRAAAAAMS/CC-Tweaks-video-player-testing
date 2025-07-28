@@ -1,0 +1,42 @@
+-- Computer A: Sends table every time it changes
+local modemSide = "back" -- adjust as needed
+rednet.open(modemSide)
+
+local targetID = nil -- set to specific ID if needed
+local protocol = "sortStep"
+
+local function sendTable(t)
+    if targetID then
+        rednet.send(targetID, t, protocol)
+    else
+        rednet.broadcast(t, protocol)
+    end
+end
+
+-- Generate random table
+local size = 100
+local t = {}
+for i = 1, size do
+    t[i] = math.random()
+end
+
+-- Send initial table
+sendTable({ type = "start", data = t })
+
+-- Insertion Sort with step sending
+for i = 2, #t do
+    local key = t[i]
+    local j = i - 1
+    while j >= 1 and t[j] > key do
+        t[j + 1] = t[j]
+        j = j - 1
+        sendTable({ type = "step", data = { table = t, index = j + 1 } })
+    end
+    t[j + 1] = key
+    sendTable({ type = "step", data = { table = t, index = j + 1 } })
+end
+
+-- Final table
+sendTable({ type = "done", data = t })
+
+print("Sort complete and all steps sent.")
