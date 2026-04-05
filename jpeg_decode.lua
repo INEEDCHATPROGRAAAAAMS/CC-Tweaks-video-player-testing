@@ -342,19 +342,26 @@ function M.decode(data)
             end
 
         -- ── DRI (Define Restart Interval) ─────────────────────────────────
-        elseif m == 0xDD then
-            br.u16()                       -- length (always 4)
-            restart_interval = br.u16()
+        -- ── DRI (Define Restart Interval) ─────────────────────────────────
+elseif m == 0xDD then
+    br.u16()                       -- length (always 4)
+    restart_interval = br.u16()
 
-        -- ── RST markers at top level (shouldn't happen, ignore) ───────────
-        elseif m >= 0xD0 and m <= 0xD7 then
-            -- nothing
+-- ── APP0-APP15 (Application segments including EXIF, thumbnails, etc.) ──
+elseif m >= 0xE0 and m <= 0xEF then
+    local len = br.u16()
+    br.skip(len - 2)  -- Skip the entire APP segment
+    -- Don't try to parse EXIF, thumbnails, or any metadata
 
-        -- ── Everything else: skip over the segment ────────────────────────
-        else
-            local len = br.u16()
-            br.skip(len - 2)
-        end
+-- ── RST markers at top level (shouldn't happen, ignore) ───────────
+elseif m >= 0xD0 and m <= 0xD7 then
+    -- nothing
+
+-- ── Everything else: skip over the segment ────────────────────────
+else
+    local len = br.u16()
+    br.skip(len - 2)
+end
     end
 
     assert(img_w and img_h and ncomp, "[jpeg] SOF0 not found before SOS")
