@@ -1,0 +1,11 @@
+local fs = require("filesystem")
+
+local path = "/home/Tester.3dx"
+local time = fs.lastModified(path)
+
+if time and time > 0 then
+    print("Tester.3dx:")
+    print(os.date("%Y-%m-%d %H:%M:%S", time))
+else
+    print("No valid timestamp found.")
+end
