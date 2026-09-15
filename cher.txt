@@ -1,0 +1,21 @@
+local fs = require("filesystem")
+
+local oldestTime = math.huge
+local oldestPath = nil
+
+for file in fs.list("/") do
+    local path = fs.concat("/", file)
+    local time = fs.lastModified(path)
+
+    if time and time < oldestTime then
+        oldestTime = time
+        oldestPath = path
+    end
+end
+
+if oldestPath then
+    print("Oldest: " .. oldestPath)
+    print(os.date("%Y-%m-%d %H:%M:%S", oldestTime))
+else
+    print("No files found.")
+end
