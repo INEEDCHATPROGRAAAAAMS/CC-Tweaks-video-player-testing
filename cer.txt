@@ -1,6 +1,6 @@
 local fs = require("filesystem")
 
-local path = "/boot"
+local path = "/home/Installer"
 local time = fs.lastModified(path)
 
 print("Raw timestamp:", time)
