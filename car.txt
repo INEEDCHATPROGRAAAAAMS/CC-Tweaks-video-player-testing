@@ -1,0 +1,7 @@
+local fs = require("filesystem")
+
+local path = "/home/Tester.3dx"
+local time = fs.lastModified(path)
+
+print("Raw timestamp:", time)
+print("Current time:", os.time())
